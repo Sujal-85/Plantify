@@ -1,0 +1,7 @@
+import 'package:flutter/material.dart';
+
+import 'platform_utils_io.dart' if (dart.library.html) 'platform_utils_web.dart' as platform;
+
+Widget displayImage(String path, {BoxFit fit = BoxFit.cover, Color? color, BlendMode? colorBlendMode}) {
+  return platform.displayImage(path, fit: fit, color: color, colorBlendMode: colorBlendMode);
+}
