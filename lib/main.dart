@@ -63,25 +63,32 @@ class AgriVisionApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<TFLiteService>(
-          create: (_) => TFLiteService()..loadModel(),
-          dispose: (_, service) => service.close(),
-        ),
-        Provider<DatabaseService>(create: (_) => DatabaseService()),
+        // 1. Independent / Low-level Services
+        if (prefs != null) 
+          ChangeNotifierProvider<PreferenceService>.value(value: prefs!),
         Provider<AuthService>(create: (_) => AuthService()),
-        Provider(create: (_) => NotificationService()),
-        ProxyProvider3<DatabaseService, MongoService, UserProvider, SyncService>(
-          update: (context, db, mongo, user, previous) => 
-            previous ?? (SyncService(db, mongo, user)..initialize()),
-        ),
+        Provider<DatabaseService>(create: (_) => DatabaseService()),
         Provider<MongoService>(
           create: (_) => MongoService(),
           dispose: (_, service) => service.close(),
         ),
+        Provider(create: (_) => NotificationService()),
         Provider<WeatherService>(create: (_) => WeatherService()),
-        if (prefs != null) 
-          ChangeNotifierProvider<PreferenceService>.value(value: prefs!),
+        Provider<TFLiteService>(
+          create: (_) => TFLiteService()..loadModel(),
+          dispose: (_, service) => service.close(),
+        ),
+
+        // 2. Dependent Providers
+        // UserProvider depends on PreferenceService (implicitly via constructor arg passed in main, but good to be here)
         ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider(prefs)),
+
+        // 3. High-level Services (Depend on others)
+        // SyncService depends on DatabaseService, MongoService, UserProvider
+        ProxyProvider3<DatabaseService, MongoService, UserProvider, SyncService>(
+          update: (context, db, mongo, user, previous) => 
+            previous ?? (SyncService(db, mongo, user)..initialize()),
+        ),
       ],
       child: Consumer<PreferenceService>(
         builder: (context, prefsService, child) {

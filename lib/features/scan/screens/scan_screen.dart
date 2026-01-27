@@ -4,10 +4,12 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_colors.dart';
-import 'processing_screen.dart';
+import 'package:plant_analysis/core/services/tflite_service.dart';
+import 'package:plant_analysis/core/services/database_service.dart';
+import 'package:plant_analysis/core/services/sync_service.dart';
+import 'package:plant_analysis/features/results/screens/results_screen.dart';
 import '../../identify/screens/identify_processing_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:plant_analysis/core/services/tflite_service.dart';
 
 class ScanScreen extends StatefulWidget {
   final bool isIdentifyMode;
@@ -22,6 +24,7 @@ class _ScanScreenState extends State<ScanScreen> {
   bool _isCameraInitialized = false;
   bool _isDiagnosing = false;
   double _progress = 0.0;
+  String _statusText = "";
   late bool _isIdentifyMode;
 
   @override
@@ -140,45 +143,8 @@ class _ScanScreenState extends State<ScanScreen> {
             ),
           ),
 
-          // Progress Bar (when diagnosing/identifying)
-          if (_isDiagnosing)
-          Positioned(
-            bottom: 220,
-            left: 60,
-            right: 60,
-            child: Column(
-              children: [
-                Container(
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: _progress,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  '${(_progress * 100).toInt()}%',
-                  style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  _isIdentifyMode ? 'Identifying plants...' : 'Diagnosing plants...',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-
-          // Bottom Bar
+          // Bottom Bar (always visible unless processing)
+          if (!_isDiagnosing)
           Positioned(
             bottom: 60,
             left: 0,
@@ -199,7 +165,7 @@ class _ScanScreenState extends State<ScanScreen> {
                   children: [
                     _buildCircularButton(Icons.folder_outlined, () {}),
                     GestureDetector(
-                      onTap: _isDiagnosing ? null : _startProcess,
+                      onTap: _startProcess,
                       child: Container(
                         height: 80,
                         width: 80,
@@ -222,7 +188,59 @@ class _ScanScreenState extends State<ScanScreen> {
               ],
             ),
           ),
+
+          // Processing Overlay
+          if (_isDiagnosing)
+            _buildProcessingOverlay(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProcessingOverlay() {
+    return Container(
+      color: Colors.black.withOpacity(0.8), // Darken background
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Scanning Animation
+             Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.primary, width: 3),
+              ),
+              child: const Center(
+                child: Icon(Icons.search, size: 50, color: AppColors.primary),
+              ),
+            ).animate(onPlay: (controller) => controller.repeat())
+             .shimmer(duration: 1500.ms, color: Colors.white)
+             .scale(begin: const Offset(0.9, 0.9), end: const Offset(1.1, 1.1), duration: 1000.ms, curve: Curves.easeInOut)
+             .then().scale(begin: const Offset(1.1, 1.1), end: const Offset(0.9, 0.9), duration: 1000.ms),
+
+            const SizedBox(height: 32),
+            
+            // Status Text
+            Text(
+              _statusText,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ).animate().fadeIn(),
+
+            const SizedBox(height: 8),
+            
+            // Subtitle
+            const Text(
+              'Analyzing crop health...',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -309,15 +327,13 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Future<void> _startProcess() async {
-    debugPrint("ScanScreen: _startProcess called");
-    // 1. Animate scanning immediately
+    // 1. Show processing state
     setState(() {
       _isDiagnosing = true;
-      _progress = 0.5; // Show some progress immediately
+      _statusText = "Capturing...";
     });
     
-    // 2. Take Picture (Real) - No fake delays
-    debugPrint("ScanScreen: About to take picture immediately");
+    // 2. Take Picture
     await _takePicture();
   }
 
@@ -332,13 +348,8 @@ class _ScanScreenState extends State<ScanScreen> {
       final image = await _controller!.takePicture();
       debugPrint("ScanScreen: Picture taken at ${image.path}");
       
-      if (!mounted) {
-         debugPrint("ScanScreen: Not mounted after capture");
-         return;
-      }
+      if (!mounted) return;
 
-      // Navigate to appropriate processing screen
-      debugPrint("ScanScreen: Navigating to processing screen (Identify: $_isIdentifyMode)");
       if (_isIdentifyMode) {
          Navigator.pushReplacement(
           context,
@@ -347,55 +358,124 @@ class _ScanScreenState extends State<ScanScreen> {
           ),
         );
       } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProcessingScreen(imagePath: image.path),
-          ),
-        ).then((_) => debugPrint("ScanScreen: Navigation completed/returned"));
+        // Run diagnosis in-place
+        await _processDiagnosis(image.path);
       }
     } catch (e) {
-      debugPrint("Error taking picture or navigating: $e");
-      setState(() => _isDiagnosing = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Camera Error: Failed to capture image. Please try Gallery.'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-            action: SnackBarAction(
-              label: 'Open Gallery',
-              textColor: Colors.white,
-              onPressed: _pickFromGallery,
-            ),
-          ),
-        );
-      }
+      debugPrint("Error taking picture: $e");
+      _handleError(e.toString());
     }
   }
 
+  Future<void> _processDiagnosis(String imagePath) async {
+    final tfliteService = context.read<TFLiteService>();
+    final dbService = context.read<DatabaseService>();
+    final syncService = context.read<SyncService>();
+
+    setState(() {
+      _statusText = "Analyzing Image...";
+    });
+
+    try {
+      // 1. TFLite Prediction
+      // Service guarantees a Map return or throws
+      final rawResult = await tfliteService.predict(imagePath);
+      
+      if (!mounted) return;
+
+      String label = rawResult['label']?.toString() ?? 'Unknown';
+      label = label.replaceAll('___', ' ').replaceAll('_', ' ');
+      
+      double confidence = 0.0;
+      final rawConfidence = rawResult['confidence'];
+      if (rawConfidence is num) {
+        confidence = rawConfidence.toDouble();
+      }
+
+      if (label == 'Timeout' || label == 'Detection Failed') {
+        throw Exception("AI analysis failed");
+      }
+
+      setState(() {
+        _statusText = "Saving Result...";
+      });
+
+      // 2. Save Result (Non-blocking usually, but we await for safety before nav)
+      await dbService.saveScan(imagePath, label, confidence);
+      
+      // Fire-and-forget sync (Safe)
+      try {
+        if (mounted) {
+           // We re-read provider inside try to be safe or use the local reference
+           // Ensure we don't block main flow if sync fails
+           syncService.triggerSync().catchError((e) {
+             debugPrint("Sync error (background): $e");
+           });
+        }
+      } catch (e) {
+         debugPrint("Sync service unavailable or error: $e");
+      }
+
+      if (!mounted) return;
+
+      // 3. Navigate to Results
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ResultsScreen(
+            imagePath: imagePath,
+            label: label,
+            confidence: confidence,
+          ),
+        ),
+      );
+
+    } catch (e) {
+      debugPrint("Diagnosis Error: $e");
+      _handleError(e.toString());
+    }
+  }
+
+  void _handleError(String message) {
+    setState(() => _isDiagnosing = false);
+    if (!mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error: $message'),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Future<void> _pickFromGallery() async {
-    debugPrint("ScanScreen: Picking from gallery...");
     try {
       final picker = ImagePicker();
       final image = await picker.pickImage(source: ImageSource.gallery);
       
       if (image != null) {
-        debugPrint("ScanScreen: Image picked from gallery: ${image.path}");
-        if (mounted) {
-          debugPrint("ScanScreen: Navigating to ProcessingScreen...");
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProcessingScreen(imagePath: image.path),
-            ),
-          );
+        if (_isIdentifyMode) {
+          if (mounted) {
+             Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => IdentifyProcessingScreen(imagePath: image.path),
+              ),
+            );
+          }
+        } else {
+          // Process diagnosis
+          setState(() {
+             _isDiagnosing = true;
+             _statusText = "Processing...";
+          });
+          await _processDiagnosis(image.path);
         }
-      } else {
-        debugPrint("ScanScreen: Gallery picker cancelled/failed");
       }
     } catch (e) {
-      debugPrint("ScanScreen: Error picking from gallery: $e");
+      debugPrint("Gallery Error: $e");
+      _handleError("Failed to pick image");
     }
   }
 }

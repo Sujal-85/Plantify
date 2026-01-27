@@ -19,7 +19,7 @@ class UserProvider extends ChangeNotifier {
   // ... inside UserProvider class
 
   // Backend URL (Emulator)
-  static const String baseUrl = 'http://192.168.1.70:3000/api/users';
+  static const String baseUrl = 'https://plantify-production-ab96.up.railway.app/api/users';
   
   UserProvider([this._prefs]) {
     if (_prefs != null) {
