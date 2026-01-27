@@ -138,13 +138,13 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             itemBuilder: (BuildContext context) {
               return [
-                const PopupMenuItem(value: 'Settings', child: Text('Settings')),
-                const PopupMenuItem(value: 'Feedback', child: Text('Give Feedback')),
-                const PopupMenuItem(value: 'Recommend', child: Text('Recommend Plantix')),
-                const PopupMenuItem(value: 'Contact', child: Text('Contact & Social')),
-                const PopupMenuItem(value: 'Thanks', child: Text('Thanks')),
-                const PopupMenuItem(value: 'Legal', child: Text('Legal Notices')),
-                const PopupMenuItem(value: 'Quickstart', child: Text('Quickstart')),
+                PopupMenuItem(value: 'Settings', child: Text(AppLocalizations.of(context)!.settings)),
+                PopupMenuItem(value: 'Feedback', child: Text(AppLocalizations.of(context)!.giveFeedback)),
+                PopupMenuItem(value: 'Recommend', child: Text(AppLocalizations.of(context)!.recommendApp)),
+                PopupMenuItem(value: 'Contact', child: Text(AppLocalizations.of(context)!.contactSocial)),
+                PopupMenuItem(value: 'Thanks', child: Text(AppLocalizations.of(context)!.thanks)),
+                PopupMenuItem(value: 'Legal', child: Text(AppLocalizations.of(context)!.legalNotices)),
+                PopupMenuItem(value: 'Quickstart', child: Text(AppLocalizations.of(context)!.quickstart)),
               ];
             },
           ),

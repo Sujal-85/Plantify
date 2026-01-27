@@ -99,6 +99,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
   }
 
   Widget _buildPostCard(CommunityPost post) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -166,7 +167,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       const Spacer(),
                       const Icon(Icons.chat_bubble_outline, size: 16, color: Colors.grey),
                       const SizedBox(width: 4),
-                      Text('${post.comments.length} answers', style: const TextStyle(color: Colors.grey)),
+                      Text('${post.comments.length} ${l10n.answers}', style: const TextStyle(color: Colors.grey)),
                     ],
                   ),
                 ],

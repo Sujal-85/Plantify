@@ -5,7 +5,7 @@ import 'package:plant_analysis/features/community/models/community_post.dart';
 class CommunityService {
   // Use 10.0.2.2 for Android Emulator, or localhost for iOS/Web if needed
   // If running on physical device, use your machine's local IP address (e.g. 192.168.1.x)
-  static const String baseUrl = 'http://192.168.1.70:3000/api/posts'; 
+  static const String baseUrl = 'https://plantify-production-ab96.up.railway.app/api/posts'; 
 
   Future<List<CommunityPost>> getPosts() async {
     try {

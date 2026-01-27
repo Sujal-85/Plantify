@@ -10,6 +10,7 @@ import 'package:plant_analysis/widgets/glass_card.dart';
 import 'history_detail_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../home/screens/dashboard_screen.dart';
+import 'package:plant_analysis/l10n/app_localizations.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -127,7 +128,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         titlePadding: const EdgeInsets.only(left: 16, bottom: 90), // Move title up to make room for bottom
         expandedTitleScale: 1.4,
         title: Text(
-          'Your Scans',
+          AppLocalizations.of(context)!.historyTitle,
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -194,7 +195,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             child: TextField(
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
-                hintText: 'Search diagnoses...',
+                hintText: AppLocalizations.of(context)!.searchHistory,
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -241,9 +242,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
            if (!mounted) return;
            ScaffoldMessenger.of(context).showSnackBar(
              SnackBar(
-               content: const Text('Scan deleted'),
+               content: Text(AppLocalizations.of(context)!.scanDeleted),
                action: SnackBarAction(
-                 label: 'Undo',
+                 label: AppLocalizations.of(context)!.undo,
                  onPressed: () async {
                    // Restore logic - simplified by re-saving
                    await db.saveScan(item['imagePath'], item['diseaseName'], item['confidence']);
@@ -317,7 +318,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          isHealthy ? 'Healthy' : 'Risk Detected',
+                          isHealthy ? AppLocalizations.of(context)!.healthy : AppLocalizations.of(context)!.riskDetected,
                           style: TextStyle(
                             color: isHealthy ? Colors.green[800] : Colors.red[800],
                             fontSize: 10,
@@ -344,7 +345,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           Icon(Icons.eco_outlined, size: 80, color: Colors.grey[300]),
           const SizedBox(height: 16),
           Text(
-            'No scans yet',
+            AppLocalizations.of(context)!.noHistory,
             style: TextStyle(color: Colors.grey[500], fontSize: 18),
           ),
         ],

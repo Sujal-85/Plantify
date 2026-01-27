@@ -11,6 +11,7 @@ import 'core/services/database_service.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/preference_service.dart';
 import 'core/services/weather_service.dart';
+import 'core/services/gemini_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'features/auth/screens/welcome_screen.dart';
@@ -78,6 +79,7 @@ class AgriVisionApp extends StatelessWidget {
           create: (_) => TFLiteService()..loadModel(),
           dispose: (_, service) => service.close(),
         ),
+        Provider<GeminiService>(create: (_) => GeminiService()),
 
         // 2. Dependent Providers
         // UserProvider depends on PreferenceService (implicitly via constructor arg passed in main, but good to be here)

@@ -6,6 +6,7 @@ import '../../../../core/services/auth_service.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../../../core/services/preference_service.dart';
 import '../../../../core/providers/user_provider.dart';
+import 'package:plant_analysis/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -25,7 +26,7 @@ class ProfileScreen extends StatelessWidget {
           child: Image.asset('assets/images/app_logo.png'),
         ),
         title: Text(
-          'Account',
+          AppLocalizations.of(context)!.account,
           style: TextStyle(
             color: Theme.of(context).textTheme.displayLarge?.color, 
             fontWeight: FontWeight.bold, 
@@ -85,15 +86,15 @@ class ProfileScreen extends StatelessWidget {
               _buildUpgradeBanner(context),
               const SizedBox(height: 24),
               // Menu Items
-              _buildMenuItem(context, Icons.notifications_outlined, 'Notification', () => Navigator.pushNamed(context, '/notification_settings')),
-              _buildMenuItem(context, Icons.shield_outlined, 'Account & Security', () => Navigator.pushNamed(context, '/security')),
+              _buildMenuItem(context, Icons.notifications_outlined, AppLocalizations.of(context)!.notificationSettings, () => Navigator.pushNamed(context, '/notification_settings')),
+              _buildMenuItem(context, Icons.shield_outlined, AppLocalizations.of(context)!.accountSecurity, () => Navigator.pushNamed(context, '/security')),
               // Skipping Billing & Subscriptions as requested
-              _buildMenuItem(context, Icons.payment_outlined, 'Payment Methods', () {}),
-              _buildMenuItem(context, Icons.link_outlined, 'Linked Accounts', () => Navigator.pushNamed(context, '/linked_accounts')),
-              _buildMenuItem(context, Icons.visibility_outlined, 'App Appearance', () => Navigator.pushNamed(context, '/app_appearance')),
-              _buildMenuItem(context, Icons.bar_chart_outlined, 'Data & Analytics', () => Navigator.pushNamed(context, '/data_analytics')),
-              _buildMenuItem(context, Icons.help_outline_outlined, 'Help & Support', () => Navigator.pushNamed(context, '/help_support')),
-              _buildMenuItem(context, Icons.logout, 'Logout', () async {
+              _buildMenuItem(context, Icons.payment_outlined, AppLocalizations.of(context)!.paymentMethods, () {}),
+              _buildMenuItem(context, Icons.link_outlined, AppLocalizations.of(context)!.linkedAccounts, () => Navigator.pushNamed(context, '/linked_accounts')),
+              _buildMenuItem(context, Icons.visibility_outlined, AppLocalizations.of(context)!.appAppearance, () => Navigator.pushNamed(context, '/app_appearance')),
+              _buildMenuItem(context, Icons.bar_chart_outlined, AppLocalizations.of(context)!.dataAnalytics, () => Navigator.pushNamed(context, '/data_analytics')),
+              _buildMenuItem(context, Icons.help_outline_outlined, AppLocalizations.of(context)!.helpSupport, () => Navigator.pushNamed(context, '/help_support')),
+              _buildMenuItem(context, Icons.logout, AppLocalizations.of(context)!.logout, () async {
                 final prefs = Provider.of<PreferenceService>(context, listen: false);
                 await authService.signOut();
                 await prefs.clear();
@@ -130,17 +131,17 @@ class ProfileScreen extends StatelessWidget {
             child: const Icon(Icons.workspace_premium, color: Colors.orange, size: 24),
           ),
           const SizedBox(width: 16),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Upgrade Plan to Unlock More!',
+                  AppLocalizations.of(context)!.upgradePlan,
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 SizedBox(height: 4),
                 Text(
-                  'Enjoy all the benefits and explore more possibilities',
+                  AppLocalizations.of(context)!.upgradePlanSubtitle,
                   style: TextStyle(color: Colors.white70, fontSize: 11),
                 ),
               ],

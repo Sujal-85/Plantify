@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 class MongoService {
   // Use 10.0.2.2 for Android Emulator, localhost for iOS simulator/web
-  static const String baseUrl = 'http://192.168.1.70:3000/api';
+  static const String baseUrl = 'https://plantify-production-ab96.up.railway.app/api';
 
   // --- Users ---
   Future<void> saveUser(Map<String, dynamic> userData) async {

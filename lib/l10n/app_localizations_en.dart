@@ -194,7 +194,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About';
 
   @override
-  String get logout => 'Log Out';
+  String get logout => 'Logout';
 
   @override
   String get viewProfile => 'View Profile';
@@ -207,4 +207,99 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get search => 'Search';
+
+  @override
+  String get diagnosis => 'Diagnosis';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get historyTitle => 'Your Scans';
+
+  @override
+  String get noHistory => 'No scans yet';
+
+  @override
+  String get searchHistory => 'Search diagnoses...';
+
+  @override
+  String get healthy => 'Healthy';
+
+  @override
+  String get riskDetected => 'Risk Detected';
+
+  @override
+  String get scanDeleted => 'Scan deleted';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get giveFeedback => 'Give Feedback';
+
+  @override
+  String get recommendApp => 'Recommend Plantix';
+
+  @override
+  String get contactSocial => 'Contact & Social';
+
+  @override
+  String get thanks => 'Thanks';
+
+  @override
+  String get legalNotices => 'Legal Notices';
+
+  @override
+  String get quickstart => 'Quickstart';
+
+  @override
+  String get upgradePlan => 'Upgrade Plan to Unlock More!';
+
+  @override
+  String get upgradePlanSubtitle =>
+      'Enjoy all the benefits and explore more possibilities';
+
+  @override
+  String get notificationSettings => 'Notification';
+
+  @override
+  String get accountSecurity => 'Account & Security';
+
+  @override
+  String get paymentMethods => 'Payment Methods';
+
+  @override
+  String get linkedAccounts => 'Linked Accounts';
+
+  @override
+  String get appAppearance => 'App Appearance';
+
+  @override
+  String get dataAnalytics => 'Data & Analytics';
+
+  @override
+  String get checkYourPlant => 'Check Your Plant';
+
+  @override
+  String get checkYourPlantSubtitle =>
+      'Take photos, start diagnose diseases, & get plant care tips.';
+
+  @override
+  String get commonDiseases => 'Common Diseases';
+
+  @override
+  String get exploreDiseases => 'Explore Diseases';
+
+  @override
+  String get cloudSync => 'Cloud Sync';
+
+  @override
+  String get connectingServices => 'Connecting to backend services...';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get answers => 'answers';
 }

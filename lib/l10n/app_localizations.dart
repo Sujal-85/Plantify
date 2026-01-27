@@ -501,7 +501,7 @@ abstract class AppLocalizations {
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:
-  /// **'Log Out'**
+  /// **'Logout'**
   String get logout;
 
   /// No description provided for @viewProfile.
@@ -527,6 +527,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search'**
   String get search;
+
+  /// No description provided for @diagnosis.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnosis'**
+  String get diagnosis;
+
+  /// No description provided for @history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get history;
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Scans'**
+  String get historyTitle;
+
+  /// No description provided for @noHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No scans yet'**
+  String get noHistory;
+
+  /// No description provided for @searchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Search diagnoses...'**
+  String get searchHistory;
+
+  /// No description provided for @healthy.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthy'**
+  String get healthy;
+
+  /// No description provided for @riskDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk Detected'**
+  String get riskDetected;
+
+  /// No description provided for @scanDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan deleted'**
+  String get scanDeleted;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @giveFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Give Feedback'**
+  String get giveFeedback;
+
+  /// No description provided for @recommendApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommend Plantix'**
+  String get recommendApp;
+
+  /// No description provided for @contactSocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact & Social'**
+  String get contactSocial;
+
+  /// No description provided for @thanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks'**
+  String get thanks;
+
+  /// No description provided for @legalNotices.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal Notices'**
+  String get legalNotices;
+
+  /// No description provided for @quickstart.
+  ///
+  /// In en, this message translates to:
+  /// **'Quickstart'**
+  String get quickstart;
+
+  /// No description provided for @upgradePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade Plan to Unlock More!'**
+  String get upgradePlan;
+
+  /// No description provided for @upgradePlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy all the benefits and explore more possibilities'**
+  String get upgradePlanSubtitle;
+
+  /// No description provided for @notificationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get notificationSettings;
+
+  /// No description provided for @accountSecurity.
+  ///
+  /// In en, this message translates to:
+  /// **'Account & Security'**
+  String get accountSecurity;
+
+  /// No description provided for @paymentMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Methods'**
+  String get paymentMethods;
+
+  /// No description provided for @linkedAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked Accounts'**
+  String get linkedAccounts;
+
+  /// No description provided for @appAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'App Appearance'**
+  String get appAppearance;
+
+  /// No description provided for @dataAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Data & Analytics'**
+  String get dataAnalytics;
+
+  /// No description provided for @checkYourPlant.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Your Plant'**
+  String get checkYourPlant;
+
+  /// No description provided for @checkYourPlantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photos, start diagnose diseases, & get plant care tips.'**
+  String get checkYourPlantSubtitle;
+
+  /// No description provided for @commonDiseases.
+  ///
+  /// In en, this message translates to:
+  /// **'Common Diseases'**
+  String get commonDiseases;
+
+  /// No description provided for @exploreDiseases.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore Diseases'**
+  String get exploreDiseases;
+
+  /// No description provided for @cloudSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Sync'**
+  String get cloudSync;
+
+  /// No description provided for @connectingServices.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to backend services...'**
+  String get connectingServices;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @answers.
+  ///
+  /// In en, this message translates to:
+  /// **'answers'**
+  String get answers;
 }
 
 class _AppLocalizationsDelegate

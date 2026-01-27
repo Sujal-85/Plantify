@@ -102,12 +102,12 @@ class DashboardScreenState extends State<DashboardScreen> {
                  // I'll use "Diagnosis" hardcoded for now or try to add it. 
                  // Best practice: Use 'Assistant' or 'See diagnosis' truncated? 
                  // I'll use Text('Diagnosis') for now to be safe and specific.
-                label: 'Diagnosis', 
+                label: AppLocalizations.of(context)!.diagnosis, 
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.history_outlined),
                 activeIcon: const Icon(Icons.history_rounded),
-                label: 'History',
+                label: AppLocalizations.of(context)!.history,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.person_outline_rounded),

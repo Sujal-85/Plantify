@@ -7,10 +7,11 @@ import '../../home/screens/ai_assistant_welcome_screen.dart';
 import '../../../core/services/preference_service.dart';
 import 'package:provider/provider.dart';
 import '../../../widgets/glass_card.dart';
-import '../../../core/services/mongo_service.dart';
+import '../../../core/services/gemini_service.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../home/screens/dashboard_screen.dart';
+import 'package:plant_analysis/l10n/app_localizations.dart';
 
 class DiagnoseTab extends StatelessWidget {
   const DiagnoseTab({super.key});
@@ -33,7 +34,7 @@ class DiagnoseTab extends StatelessWidget {
           },
         ),
         title: Text(
-          'Diagnose',
+          AppLocalizations.of(context)!.diagnosis,
           style: TextStyle(
             color: Theme.of(context).textTheme.displayLarge?.color,
             fontWeight: FontWeight.bold,
@@ -48,9 +49,9 @@ class DiagnoseTab extends StatelessWidget {
                showDialog(
                  context: context, 
                  builder: (_) => AlertDialog(
-                   title: const Text('Cloud Sync'),
-                   content: const Text('Connecting to backend services...'),
-                   actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))]
+                   title: Text(AppLocalizations.of(context)!.cloudSync),
+                   content: Text(AppLocalizations.of(context)!.connectingServices),
+                   actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(AppLocalizations.of(context)!.ok))]
                  )
                );
             },
@@ -89,12 +90,12 @@ class DiagnoseTab extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Check Your Plant',
+                            AppLocalizations.of(context)!.checkYourPlant,
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 20),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Take photos, start diagnose diseases, & get plant care tips.',
+                            AppLocalizations.of(context)!.checkYourPlantSubtitle,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(height: 16),
@@ -112,7 +113,7 @@ class DiagnoseTab extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                               elevation: 0,
                             ),
-                            child: const Text('Diagnose', style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: Text(AppLocalizations.of(context)!.diagnosis, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         ],
                       ),
@@ -140,7 +141,7 @@ class DiagnoseTab extends StatelessWidget {
             const SizedBox(height: 32),
 
             // Common Diseases Section
-            _buildSectionHeader(context, 'Common Diseases'),
+            _buildSectionHeader(context, AppLocalizations.of(context)!.commonDiseases),
             const SizedBox(height: 16),
             SizedBox(
               height: 180,
@@ -189,12 +190,12 @@ class DiagnoseTab extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Ask Plant Expert',
+                                  AppLocalizations.of(context)!.askExpert,
                                   style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 16, color: const Color(0xFF3D45C5)),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Get instant answers from our AI botanist.',
+                                  AppLocalizations.of(context)!.askExpertSubtitle,
                                   style: Theme.of(context).textTheme.bodySmall,
                                 ),
                               ],
@@ -211,7 +212,7 @@ class DiagnoseTab extends StatelessWidget {
             const SizedBox(height: 32),
 
             // Explore Diseases Grid
-            _buildSectionHeader(context, 'Explore Diseases'),
+            _buildSectionHeader(context, AppLocalizations.of(context)!.exploreDiseases),
             const SizedBox(height: 16),
             GridView.count(
               shrinkWrap: true,
@@ -391,7 +392,7 @@ class DiagnoseTab extends StatelessWidget {
               const Divider(),
               Expanded(
                 child: FutureBuilder<String>(
-                  future: context.read<MongoService>().getChatResponse(prompt, []),
+                  future: context.read<GeminiService>().chat(prompt, []),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(

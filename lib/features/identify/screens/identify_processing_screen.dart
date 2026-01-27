@@ -6,7 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/tflite_service.dart';
-import '../../../core/services/mongo_service.dart';
+import '../../../core/services/gemini_service.dart';
 import '../../../core/services/database_service.dart';
 import 'identify_results_screen.dart';
 import 'identify_error_screen.dart';
@@ -32,7 +32,7 @@ class _IdentifyProcessingScreenState extends State<IdentifyProcessingScreen> {
     if (!mounted) return;
 
     final tfliteService = context.read<TFLiteService>();
-    final mongoService = context.read<MongoService>();
+    final geminiService = context.read<GeminiService>();
     
     // Check Connectivity
     final connectivityResult = await Connectivity().checkConnectivity();
@@ -62,8 +62,8 @@ class _IdentifyProcessingScreenState extends State<IdentifyProcessingScreen> {
       if (offlineIdentified) {
         _navigateToResults(resultData!);
       } else if (isOnline) {
-        // Fallback to Backend AI
-        final data = await mongoService.identifyPlant(widget.imagePath);
+        // Fallback to Backend AI (Now Local Gemini)
+        final data = await geminiService.identifyPlant(widget.imagePath);
         if (!data.containsKey('error')) {
           _navigateToResults(data);
         } else {

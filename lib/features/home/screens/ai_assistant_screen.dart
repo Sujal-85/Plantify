@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/services/mongo_service.dart';
+import '../../../core/services/gemini_service.dart';
 import '../../../core/services/database_service.dart';
 import 'chat_history_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -103,9 +103,9 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     _scrollToBottom();
     await context.read<DatabaseService>().saveChatMessage(text, true);
 
-    final mongoService = context.read<MongoService>();
+    final geminiService = context.read<GeminiService>();
     try {
-      final response = await mongoService.getChatResponse(text, _history);
+      final response = await geminiService.chat(text, _history);
       
       setState(() {
         _messages.add(ChatModel(text: response, isUser: false));
