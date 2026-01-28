@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import 'pesticide_sub_screens.dart';
 
 class PesticideCalculatorScreen extends StatefulWidget {
   const PesticideCalculatorScreen({super.key});
@@ -9,189 +10,162 @@ class PesticideCalculatorScreen extends StatefulWidget {
 }
 
 class _PesticideCalculatorScreenState extends State<PesticideCalculatorScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _areaController = TextEditingController();
-  final _tankSizeController = TextEditingController();
-  final _doseController = TextEditingController();
-  
-  String _dosageType = 'ml per Tank'; // or 'ml per Acre'
-  
-  double _totalWater = 0;
-  double _totalChemical = 0;
-  double _totalTanks = 0;
-  bool _showResults = false;
-
-  void _calculate() {
-    if (_formKey.currentState!.validate()) {
-      double area = double.tryParse(_areaController.text) ?? 0;
-      double tankSize = double.tryParse(_tankSizeController.text) ?? 15;
-      double dose = double.tryParse(_doseController.text) ?? 0;
-
-      // Assumptions:
-      // Standard water requirement per acre is often 150-200 Liters for field crops. 
-      // Let's assume 150 Liters per acre as a baseline for calculation if dose is per acre.
-      double waterPerAcre = 150; 
-
-      if (_dosageType == 'ml per Tank') {
-         // User says: put 50ml in 15L tank.
-         // 1. Calculate how many tanks needed for area.
-         // Liters needed = Area * 150 (approx standard). 
-         // Tanks = Liters / TankSize.
-         _totalWater = area * waterPerAcre;
-         _totalTanks = _totalWater / tankSize;
-         
-         // Chemical needed = Tanks * Dose per Tank
-         _totalChemical = _totalTanks * dose;
-
-      } else {
-        // Dosage type: 'ml per Acre'
-        // User says: 500ml per Acre.
-        _totalChemical = area * dose;
-        _totalWater = area * waterPerAcre;
-        _totalTanks = _totalWater / tankSize;
-      }
-
-      setState(() {
-        _showResults = true;
-      });
-    }
-  }
+  int _selectedType = -1; // 0 for Field crops, 1 for Trees
 
   @override
   Widget build(BuildContext context) {
-     return Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: const Text('Pesticide Calculator'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildInputCard(),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _calculate,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: AppColors.primary,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Pesticide calculator',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 30),
+            const Text(
+              'What type of crop do you want to calculate pesticide dosage for?',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, height: 1.3),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSelectionCard(
+                    0,
+                    Icons.agriculture_outlined,
+                    'Field crops',
+                    'Calculate dosage based on area planted with field crops',
+                  ),
                 ),
-                child: const Text('Calculate Spraying Mix', style: TextStyle(fontSize: 16, color: Colors.white)),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildSelectionCard(
+                    1,
+                    Icons.forest_outlined,
+                    'Trees',
+                    'Calculate dosage based on amount of water for all trees to treat',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 40),
+            // Illustration Area
+            Center(
+              child: Container(
+                height: 200,
+                width: 200,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F9F8), // Light mint/teal bg
+                  shape: BoxShape.circle,
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Placeholder for the spray bottle illustration
+                    // Using Icons to simulate the illustration for now
+                    Positioned(
+                      left: 50,
+                      bottom: 50,
+                      child: Icon(Icons.cleaning_services, size: 80, color: Colors.teal.shade300),
+                    ),
+                     Positioned(
+                      right: 60,
+                      bottom: 40,
+                      child: Icon(Icons.coffee_rounded, size: 50, color: Colors.teal.shade200), // simulate measuring cup
+                    ),
+                    Positioned(
+                       top: 40,
+                       right: 40,
+                       child: Icon(Icons.bubble_chart, size: 20, color: Colors.teal.shade100),
+                    ),
+                  ],
+                ),
               ),
-              if (_showResults) _buildResults(),
-            ],
-          ),
+            ),
+            const SizedBox(height: 30),
+            const Center(
+              child: Text(
+                'Recent calculations',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Your recent calculations will appear here. Compare them to see how changes in total product, dose per pump, and pump refills.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.black54, height: 1.5),
+            ),
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildInputCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10)],
-      ),
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _areaController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Area to Spray (Acres)',
-              border: OutlineInputBorder(),
-              suffixText: 'Acres'
-            ),
-            validator: (v) => v!.isEmpty ? 'Enter area' : null,
+  Widget _buildSelectionCard(int index, IconData icon, String title, String description) {
+    final isSelected = _selectedType == index;
+    return GestureDetector(
+      onTap: () {
+        if (index == 0) {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const FieldCropsScreen()));
+        } else if (index == 1) {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const TreesScreen()));
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        height: 200, // Fixed height to match screenshot
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
           ),
-          const SizedBox(height: 16),
-          TextFormField(
-            controller: _tankSizeController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Tank Capacity',
-              border: OutlineInputBorder(),
-              suffixText: 'Liters'
-            ),
-            validator: (v) => v!.isEmpty ? 'Enter size' : null,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: TextFormField(
-                  controller: _doseController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Chemical Dose',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (v) => v!.isEmpty ? 'Enter dose' : null,
-                ),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                flex: 2,
-                child: DropdownButtonFormField<String>(
-                  value: _dosageType,
-                  isExpanded: true,
-                  items: ['ml per Tank', 'ml per Acre']
-                      .map((u) => DropdownMenuItem(value: u, child: Text(u)))
-                      .toList(),
-                  onChanged: (v) => setState(() => _dosageType = v!),
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8EAF6),
+                borderRadius: BorderRadius.circular(8),
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResults() {
-    return Container(
-      margin: const EdgeInsets.only(top: 24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Spraying Plan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          const Divider(),
-          _buildResultRow('Total Chemical Required', '${_totalChemical.toStringAsFixed(1)} ml'),
-          _buildResultRow('Total Water Required', '${_totalWater.toStringAsFixed(0)} Liters'),
-          _buildResultRow('Tank Refills Needed', '${_totalTanks.ceil()} Tanks'),
-          const SizedBox(height: 10),
-          const Text('⚠️ Always wear protective gear (mask, gloves) while spraying.', style: TextStyle(color: Colors.red, fontSize: 12)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResultRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 16)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        ],
+              child: Icon(icon, color: const Color(0xFF3F51B5)),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: const TextStyle(color: Colors.black54, fontSize: 13, height: 1.4),
+            ),
+          ],
+        ),
       ),
     );
   }

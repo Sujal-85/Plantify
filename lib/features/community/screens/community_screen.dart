@@ -93,7 +93,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         },
         label: Text(l10n.askCommunity),
         icon: const Icon(Icons.edit),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: const Color(0xFF0056D2),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
@@ -16,6 +17,32 @@ class GeminiService {
   }
 
   bool get isAvailable => _apiKey != null && _apiKey!.isNotEmpty;
+
+  /// Identifies if an error is retryable (like server overload)
+  bool _isRetryable(dynamic e) {
+    final msg = e.toString().toLowerCase();
+    return msg.contains('503') || 
+           msg.contains('overloaded') || 
+           msg.contains('unavailable') ||
+           msg.contains('resource exhausted');
+  }
+
+  /// Retries an operation with exponential backoff
+  Future<T> _retryOperation<T>(Future<T> Function() operation, {int maxRetries = 3}) async {
+    int retryCount = 0;
+    while (true) {
+      try {
+        return await operation();
+      } catch (e) {
+        if (retryCount >= maxRetries || !_isRetryable(e)) {
+          rethrow;
+        }
+        retryCount++;
+        // Exponential backoff: 1s, 2s, 4s
+        await Future.delayed(Duration(milliseconds: 1000 * (1 << (retryCount - 1))));
+      }
+    }
+  }
 
   /// Generates a detailed diagnosis report based on the plant name and disease.
   Future<String> getDetailedDiagnosis({
@@ -40,17 +67,19 @@ class GeminiService {
       5. **Prevention**: How to prevent this in the future?
 
       Keep the tone helpful, professional, and easy to understand for a home gardener or farmer.
+      IMPORTANT: Use **bold** text to highlight key points and include friendly emojis 🌿 to make the report engaging.
     ''';
 
-    // Note: For text-only prompts we can use gemini-pro, but gemini-pro-vision supports text too.
-    // Ideally we should switch models based on input, but for this specific text prompt:
     final textModel = GenerativeModel(model: 'gemini-3-flash-preview', apiKey: _apiKey!);
     
     try {
       final content = [Content.text(prompt)];
-      final response = await textModel.generateContent(content);
+      final response = await _retryOperation(() => textModel.generateContent(content));
       return response.text ?? "Unable to generate analysis at this time.";
     } catch (e) {
+      if (_isRetryable(e)) {
+        return "The AI service is currently busy. Please try again in a moment.";
+      }
       return "Error contacting AI service: $e";
     }
   }
@@ -66,19 +95,17 @@ class GeminiService {
       final chatSession = _model.startChat(
         history: history.map((h) {
           final role = h['role'] == 'user' ? 'user' : 'model';
-          final parts = (h['parts'] as List).map((p) => Content.text(p['text'])).toList(); // Simplified content extraction
-          // Check if parts is List<Map> or just List<Content> (not typical in raw json)
-          // Actually, generative_ai package expects Content objects.
-          // Let's assume input history is simple for now or we adapt it.
-          // Given specific map structure: {'role': 'user', 'parts': [{'text': '...'}]}
-           final text = h['parts'][0]['text'];
+          final text = h['parts'][0]['text'];
            return Content(role, [TextPart(text)]);
         }).toList(),
       );
 
-      final response = await chatSession.sendMessage(Content.text(message));
+      final response = await _retryOperation(() => chatSession.sendMessage(Content.text(message)));
       return response.text ?? "No response from AI.";
     } catch (e) {
+      if (_isRetryable(e)) {
+        return "I'm receiving too many requests right now. Please try again shortly.";
+      }
       return "Error: $e";
     }
   }
@@ -91,7 +118,7 @@ class GeminiService {
 
     try {
       final bytes = await File(imagePath).readAsBytes();
-      final prompt = "Identify this plant used in agriculture/gardening. Return JSON with keys: name, scientificName, description, uses, indianName. If not a plant, return error.";
+      final prompt = "Identify this plant used in agriculture/gardening. Return JSON with keys: name, scientificName, description, uses, indianName. For 'description' and 'uses', provide detailed Markdown content with **bold** highlights, bullet points, and friendly emojis 🌿🌻. If not a plant, return error.";
       
       final content = [
         Content.multi([
@@ -100,31 +127,45 @@ class GeminiService {
         ])
       ];
 
-      final response = await _model.generateContent(content);
+      final response = await _retryOperation(() => _model.generateContent(content));
       final text = response.text;
       
       if (text == null) return {'error': 'No identification returned'};
 
-      // Try to parse JSON from Markdown block
-      final jsonString = text.replaceAll('```json', '').replaceAll('```', '').trim();
+      // Try to parse JSON from Markdown block or raw text
       try {
-         // This assumes the model returns clean JSON. We might need robust parsing.
-         // For now, return a basic map if parsing fails or rely on model instruction.
-         // Or just return the text description if JSON fails.
-         // Let's instruct the model to be strict JSON.
-         // Actually, let's just return the raw text for now if structure is complex, 
-         // but IdentifyResultsScreen expects a Map.
-         // I'll assume valid JSON usage or basic text fallback.
-         // Actually, simple regex to find JSON object?
-         // Let's leave it simple:
-          // We can't easily parse arbitrary text to map without strict prompt.
-          // Let's try to pass the text as 'description' and 'name' as 'Unknown' if not json.
-          // But user wants "identify check" working.
-          return {'name': 'AI Identified Plant', 'description': text, 'scientificName': 'Check description'};
+        final jsonStart = text.indexOf('{');
+        final jsonEnd = text.lastIndexOf('}');
+        if (jsonStart != -1 && jsonEnd != -1) {
+          final jsonString = text.substring(jsonStart, jsonEnd + 1);
+          final parsed = json.decode(jsonString);
+          return {
+            'name': parsed['name'] ?? 'Unknown Plant',
+            'scientificName': parsed['scientificName'] ?? 'Unknown',
+            'description': parsed['description'] ?? 'No description.',
+            'uses': parsed['uses'] ?? 'N/A',
+            'indianName': parsed['indianName'],
+          };
+        }
+        // Fallback if no JSON structure found
+        return {
+          'name': 'Plant Result',
+          'scientificName': 'Check description',
+          'description': text,
+          'uses': 'Information contained in description.',
+        };
       } catch (e) {
-         return {'name': 'AI Result', 'description': text, 'scientificName': ''};
+        return {
+          'name': 'AI Result',
+          'scientificName': 'Manual Check',
+          'description': text,
+          'uses': 'Information contained in description.',
+        };
       }
     } catch (e) {
+       if (_isRetryable(e)) {
+        return {'error': "Service overloaded. Please try again."};
+      }
       return {'error': e.toString()};
     }
   }

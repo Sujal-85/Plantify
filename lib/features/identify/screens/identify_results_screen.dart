@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:plant_analysis/l10n/app_localizations.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../core/theme/app_colors.dart';
 
 class IdentifyResultsScreen extends StatelessWidget {
@@ -57,12 +58,12 @@ class IdentifyResultsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                    Text(
-                    data['name'],
+                    data['name'] ?? 'Unknown Plant',
                     style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    data['scientificName'],
+                    data['scientificName'] ?? 'Unknown',
                     style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic, color: Colors.grey[600]),
                   ),
                   if (data['indianName'] != null) ...[
@@ -76,17 +77,23 @@ class IdentifyResultsScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   _buildSectionHeader(l10n.description, Icons.description_outlined),
                   const SizedBox(height: 12),
-                  Text(
-                    data['description'],
-                    style: const TextStyle(fontSize: 16, height: 1.5),
+                  MarkdownBody(
+                    data: data['description'] ?? 'No description available.',
+                    styleSheet: MarkdownStyleSheet(
+                      p: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
+                      strong: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                    ),
                   ),
 
                   const SizedBox(height: 24),
                   _buildSectionHeader(l10n.uses, Icons.eco_outlined),
                   const SizedBox(height: 12),
-                  Text(
-                    data['uses'],
-                    style: const TextStyle(fontSize: 16, height: 1.5),
+                  MarkdownBody(
+                    data: data['uses'] ?? 'No information available.',
+                    styleSheet: MarkdownStyleSheet(
+                      p: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
+                      strong: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
+                    ),
                   ),
                 ],
               ),

@@ -55,66 +55,88 @@ class DashboardScreenState extends State<DashboardScreen> {
             topLeft: Radius.circular(30),
             topRight: Radius.circular(30),
           ),
-          child: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Theme.of(context).cardTheme.color,
-            selectedItemColor: AppColors.primary,
-            unselectedItemColor: AppColors.textMuted,
-            showSelectedLabels: true,
-            showUnselectedLabels: true,
-            selectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 10,
+          child: SizedBox(
+            height: 90, // Increased height
+            child: BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Theme.of(context).cardTheme.color,
+              selectedItemColor: AppColors.primary,
+              unselectedItemColor: AppColors.textMuted,
+              showSelectedLabels: true,
+              showUnselectedLabels: true,
+              selectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 10,
+              ),
+              elevation: 0,
+              items: [
+                BottomNavigationBarItem(
+                  icon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.spa_outlined),
+                  ),
+                  activeIcon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.spa),
+                  ),
+                  label: AppLocalizations.of(context)!.yourCrops,
+                ),
+                BottomNavigationBarItem(
+                  icon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.chat_bubble_outline_rounded),
+                  ),
+                  activeIcon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.chat_bubble_rounded),
+                  ),
+                  label: AppLocalizations.of(context)!.community,
+                ),
+                BottomNavigationBarItem(
+                  icon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.bug_report_outlined),
+                  ),
+                  activeIcon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.bug_report_rounded),
+                  ),
+                  label: AppLocalizations.of(context)!.diagnosis,
+                ),
+                BottomNavigationBarItem(
+                  icon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.history_outlined),
+                  ),
+                  activeIcon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.history_rounded),
+                  ),
+                  label: AppLocalizations.of(context)!.history,
+                ),
+                BottomNavigationBarItem(
+                  icon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.person_outline_rounded),
+                  ),
+                  activeIcon: const Padding(
+                    padding: EdgeInsets.only(bottom: 4),
+                    child: Icon(Icons.person_rounded),
+                  ),
+                  label: AppLocalizations.of(context)!.you,
+                ),
+              ],
             ),
-            unselectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 10,
-            ),
-            elevation: 0,
-            items: [
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.spa_outlined),
-                activeIcon: const Icon(Icons.spa),
-                label: AppLocalizations.of(context)!.yourCrops,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.chat_bubble_outline_rounded),
-                activeIcon: const Icon(Icons.chat_bubble_rounded),
-                label: AppLocalizations.of(context)!.community,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.bug_report_outlined), // Diagnosis icon
-                activeIcon: const Icon(Icons.bug_report_rounded),
-                 // Using 'Assistant' localization or similar if Diagnosis isn't available, 
-                 // but typically 'Diagnosis' should be added to ARB if not present.
-                 // Checking ARB file content from earlier... 'assistant' exists. 
-                 // Let's use 'assistant' or hardcode 'Diagnosis' if not strict. 
-                 // User said 'add the diagonsis', implying a new label. 
-                 // I will use a hardcoded string or 'assistant' if suitable. 
-                 // AppLocalizations.of(context)!.assistant is "Assistant".
-                 // Let's check if 'diagnosis' exists. 'seeDiagnosis' exists ("See diagnosis").
-                 // I'll use "Diagnosis" hardcoded for now or try to add it. 
-                 // Best practice: Use 'Assistant' or 'See diagnosis' truncated? 
-                 // I'll use Text('Diagnosis') for now to be safe and specific.
-                label: AppLocalizations.of(context)!.diagnosis, 
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.history_outlined),
-                activeIcon: const Icon(Icons.history_rounded),
-                label: AppLocalizations.of(context)!.history,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.person_outline_rounded),
-                activeIcon: const Icon(Icons.person_rounded),
-                label: AppLocalizations.of(context)!.you,
-              ),
-            ],
           ),
         ),
       ),

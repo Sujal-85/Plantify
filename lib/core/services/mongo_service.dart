@@ -68,6 +68,43 @@ class MongoService {
     return [];
   }
 
+  // --- Survey & Feedback ---
+  Future<bool> submitSurvey(Map<String, dynamic> surveyData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/survey'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(surveyData),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      }
+      debugPrint("Failed to submit survey: ${response.body}");
+      return false;
+    } catch (e) {
+      debugPrint("Error submitting survey: $e");
+      return false;
+    }
+  }
+
+  Future<bool> submitFeedback(Map<String, dynamic> feedbackData) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/feedback'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(feedbackData),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      }
+      debugPrint("Failed to submit feedback: ${response.body}");
+      return false;
+    } catch (e) {
+      debugPrint("Error submitting feedback: $e");
+      return false;
+    }
+  }
+
   // --- AI Diagnosis & Identification (Backend Proxy) ---
   Future<Map<String, dynamic>> diagnosePlant(String imagePath) async {
     try {

@@ -131,7 +131,7 @@ class _CropSelectionScreenState extends State<CropSelectionScreen> {
                 },
               ),
             ),
-          const Divider(),
+          // const Divider(),
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(16),

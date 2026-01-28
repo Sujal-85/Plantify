@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Premium Emerald & Gold Palette
-  static const Color primary = Color(0xFF006D4E); // Deep Premium Emerald
+  static const Color primary = Color(0xFF0056D2); // Deep Premium Emerald
   static const Color primaryLight = Color(0xFF00A86B); // Vibrant Emerald
   static const Color primaryDark = Color(0xFF004D36); // Night Emerald
   static const Color accent = Color(0xFFD4AF37); // Metallic Gold

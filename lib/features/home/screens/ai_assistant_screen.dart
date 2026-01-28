@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/gemini_service.dart';
@@ -282,9 +283,12 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        message.text,
-                        style: const TextStyle(color: Colors.black87, fontSize: 15, height: 1.4, fontWeight: FontWeight.w400),
+                      MarkdownBody(
+                        data: message.text,
+                        styleSheet: MarkdownStyleSheet(
+                          p: const TextStyle(color: Colors.black87, fontSize: 15, height: 1.4),
+                          strong: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0056D2)),
+                        ),
                       ),
                       if (!isUser && message.text.contains('Health Check')) ...[
                         const SizedBox(height: 12),

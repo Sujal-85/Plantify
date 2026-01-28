@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/services/auth_service.dart';
@@ -88,6 +88,12 @@ class ProfileScreen extends StatelessWidget {
               // Menu Items
               _buildMenuItem(context, Icons.notifications_outlined, AppLocalizations.of(context)!.notificationSettings, () => Navigator.pushNamed(context, '/notification_settings')),
               _buildMenuItem(context, Icons.shield_outlined, AppLocalizations.of(context)!.accountSecurity, () => Navigator.pushNamed(context, '/security')),
+              
+              // Share App
+              _buildMenuItem(context, Icons.share_outlined, 'Share Plantify', () {
+                Share.share('Check out Plantify! It helps you diagnose plant diseases and manage your farm efficiently. Download now: https://plantify.app');
+              }),
+
               // Skipping Billing & Subscriptions as requested
               _buildMenuItem(context, Icons.payment_outlined, AppLocalizations.of(context)!.paymentMethods, () {}),
               _buildMenuItem(context, Icons.link_outlined, AppLocalizations.of(context)!.linkedAccounts, () => Navigator.pushNamed(context, '/linked_accounts')),

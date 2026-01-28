@@ -9,204 +9,312 @@ class FertilizerCalculatorScreen extends StatefulWidget {
 }
 
 class _FertilizerCalculatorScreenState extends State<FertilizerCalculatorScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _areaController = TextEditingController();
-  final TextEditingController _nController = TextEditingController();
-  final TextEditingController _pController = TextEditingController();
-  final TextEditingController _kController = TextEditingController();
+  String _selectedCrop = 'Banana';
+  int _numberOfTrees = 0;
+  final TextEditingController _treeController = TextEditingController();
 
-  String _selectedUnit = 'Acres';
-  double _ureaBags = 0;
-  double _dapBags = 0;
-  double _mopBags = 0;
-  bool _showResults = false;
+  @override
+  void initState() {
+    super.initState();
+    _treeController.text = _numberOfTrees > 0 ? '$_numberOfTrees' : '';
+  }
 
-  void _calculate() {
-    if (_formKey.currentState!.validate()) {
-      double area = double.tryParse(_areaController.text) ?? 0;
-      double n = double.tryParse(_nController.text) ?? 0;
-      double p = double.tryParse(_pController.text) ?? 0;
-      double k = double.tryParse(_kController.text) ?? 0;
-
-      // Convert area to hectares for standardization if needed, 
-      // but usually recommendations are per acre in India. 
-      // Let's assume input NPK is kg/acre if unit is acre.
-      
-      // Standard: 
-      // Urea = 46% N
-      // DAP = 18% N, 46% P
-      // MOP = 60% K
-      // Bag size = 50kg (commonly) or 45kg (Neem coated Urea). Let's assume 50kg for now.
-      
-      double pNeeded = p * area;
-      double kNeeded = k * area;
-      double nNeeded = n * area;
-
-      // 1. Calculate DAP (Phosphorus source)
-      // DAP contains 46% P. So 100kg DAP = 46kg P. 
-      // P needed = X kg. DAP needed = (X / 46) * 100.
-      double dapKg = (pNeeded / 46) * 100;
-      
-      // DAP also provides 18% N.
-      double nFromDap = (dapKg * 18) / 100;
-      
-      // 2. Calculate MOP (Potassium source)
-      // MOP contains 60% K.
-      double mopKg = (kNeeded / 60) * 100;
-
-      // 3. Calculate Urea (Remaining Nitrogen)
-      double remainingN = nNeeded - nFromDap;
-      if (remainingN < 0) remainingN = 0;
-      
-      // Urea contains 46% N.
-      double ureaKg = (remainingN / 46) * 100;
-
-      setState(() {
-        _dapBags = dapKg / 50;
-        _mopBags = mopKg / 50;
-        _ureaBags = ureaKg / 45; // Urea bags often 45kg now
-        _showResults = true;
-      });
-    }
+  void _updateTrees(int delta) {
+    setState(() {
+      _numberOfTrees += delta;
+      if (_numberOfTrees < 0) _numberOfTrees = 0;
+      _treeController.text = _numberOfTrees > 0 ? '$_numberOfTrees' : '';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Fertilizer Calculator'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildCard(
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            controller: _areaController,
-                            keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(
-                              labelText: 'Land Area',
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (v) => v!.isEmpty ? 'Enter area' : null,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          flex: 1,
-                          child: DropdownButtonFormField<String>(
-                            value: _selectedUnit,
-                            items: ['Acres', 'Hectares', 'Guntha']
-                                .map((u) => DropdownMenuItem(value: u, child: Text(u)))
-                                .toList(),
-                            onChanged: (v) => setState(() => _selectedUnit = v!),
-                            decoration: const InputDecoration(
-                              labelText: 'Unit',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    const Text('Recommended N-P-K (kg/acre)', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(child: _buildNpkField(_nController, 'N (Nitrogen)', Colors.blue[100]!)),
-                        const SizedBox(width: 10),
-                        Expanded(child: _buildNpkField(_pController, 'P (Phosphorus)', Colors.green[100]!)),
-                        const SizedBox(width: 10),
-                        Expanded(child: _buildNpkField(_kController, 'K (Potassium)', Colors.orange[100]!)),
-                      ],
-                    ),
-                  ],
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Fertilizer Calculator',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'See relevant information on',
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
                 ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _calculate,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: AppColors.primary,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedCrop,
+                      icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black54),
+                      isDense: true,
+                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedCrop = newValue!;
+                        });
+                      },
+                      items: <String>['Banana', 'Mango', 'Coconut', 'Papaya']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Row(
+                            children: [
+                              Text(_getCropEmoji(value)), 
+                              const SizedBox(width: 6),
+                              Text(value),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
-                child: const Text('Calculate Required Bags', style: TextStyle(fontSize: 16, color: Colors.white)),
-              ),
-              if (_showResults) ...[
-                const SizedBox(height: 30),
-                const Text('Required Fertilizers', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
-                _buildResultTile('Urea (45kg bag)', _ureaBags, Colors.blue),
-                _buildResultTile('DAP (50kg bag)', _dapBags, Colors.green),
-                _buildResultTile('MOP (50kg bag)', _mopBags, Colors.red),
               ],
-            ],
-          ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00695C),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text('1', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Nutrient quantities',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.info_outline, size: 20, color: Colors.grey),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              "Based on your field size and crop, we've selected a nutrient ratio for you",
+              style: TextStyle(color: Colors.black54, height: 1.4),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(child: _buildNutrientCard('N:', '100 g', '100 g/tree')),
+                const SizedBox(width: 12),
+                Expanded(child: _buildNutrientCard('P:', '0 g', '0 g/tree')),
+                const SizedBox(width: 12),
+                Expanded(child: _buildNutrientCard('K:', '300 g', '300 g/tree')),
+              ],
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'Number of trees',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _buildCounterButton(Icons.remove, () => _updateTrees(-1)),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Container(
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5), // Light grey
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextField(
+                          controller: _treeController,
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          onChanged: (value) {
+                            setState(() {
+                              _numberOfTrees = int.tryParse(value) ?? 0;
+                            });
+                          },
+                        ),
+                        if (_numberOfTrees == 0 && _treeController.text.isEmpty)
+                         SizedBox.shrink() // Don't show placeholder if just blank, wait for logic
+                        else
+                         const Text('Trees', style: TextStyle(color: Colors.black54, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                _buildCounterButton(Icons.add, () => _updateTrees(1)),
+              ],
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Calculate logic here
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey.shade300,
+                  foregroundColor: Colors.grey.shade700,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                ),
+                child: const Text('Calculate', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+            ),
+            const SizedBox(height: 40),
+            // Illustration
+             _buildIllustration(),
+             const SizedBox(height: 20),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildNpkField(TextEditingController controller, String label, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: TextInputType.number,
-        textAlign: TextAlign.center,
-        decoration: InputDecoration(
-          labelText: label,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(10),
-        ),
-         validator: (v) => v!.isEmpty ? 'Req' : null,
-      ),
-    );
+  String _getCropEmoji(String crop) {
+    switch (crop) {
+      case 'Banana': return '🍌';
+      case 'Mango': return '🥭';
+      case 'Coconut': return '🥥';
+      case 'Papaya': return '🥔'; // Close enough default
+      default: return '🌱';
+    }
   }
 
-  Widget _buildCard({required Widget child}) {
+  Widget _buildNutrientCard(String label, String amount, String rate) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10)],
+        color: const Color(0xFFF7F7F7),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: child,
-    );
-  }
-
-  Widget _buildResultTile(String label, double bags, Color color) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text('${bags.toStringAsFixed(1)} Bags', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: color)),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(height: 8),
+          Text(amount, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 4),
+          Text(rate, style: const TextStyle(color: Colors.grey, fontSize: 13)),
         ],
       ),
     );
   }
+
+  Widget _buildCounterButton(IconData icon, VoidCallback onPressed) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8EAF6),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: const Color(0xFF3949AB)),
+        onPressed: onPressed,
+      ),
+    );
+  }
+
+  Widget _buildIllustration() {
+    return SizedBox(
+      height: 150,
+      width: double.infinity,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+           // Hills
+           Positioned(
+             bottom: 0,
+             child: CustomPaint(
+               size: const Size(300, 80),
+               painter: HillPainter(),
+             ),
+           ),
+           // Trees
+           Positioned(
+             bottom: 30,
+             left: 100,
+             child: Icon(Icons.park, size: 60, color: Colors.teal.shade300),
+           ),
+           Positioned(
+             bottom: 20,
+             left: 150,
+             child: Icon(Icons.park, size: 40, color: Colors.teal.shade200),
+           ),
+           Positioned(
+             bottom: 40,
+             left: 180,
+             child: Icon(Icons.park, size: 80, color: Colors.teal.shade400),
+           ),
+            // Sun/Moon
+             Positioned(
+             top: 10,
+             left: 60,
+             child: Container(
+               width: 40,
+               height: 40,
+               decoration: BoxDecoration(
+                 color: Colors.grey.shade200,
+                 shape: BoxShape.circle,
+               ),
+             ),
+           ),
+        ],
+      ),
+    );
+  }
+}
+
+class HillPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey.shade200
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(0, size.height);
+    path.quadraticBezierTo(size.width * 0.5, 0, size.width, size.height);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

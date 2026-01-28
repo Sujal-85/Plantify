@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:plant_analysis/core/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,6 +14,7 @@ import '../../history/screens/history_screen.dart';
 import '../../../core/services/weather_service.dart';
 import '../widgets/youtube_player_widget.dart';
 import 'ai_assistant_screen.dart';
+import '../widgets/survey_card.dart';
 import 'ai_assistant_welcome_screen.dart';
 import 'crop_selection_screen.dart';
 import '../../../core/services/preference_service.dart';
@@ -119,8 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const FeedbackScreen()));
                   break;
                 case 'Recommend':
-                  // Share logic placeholder
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sharing not implemented yet')));
+                  Share.share('Check out Plantify! It helps you diagnose plant diseases and manage your farm efficiently. Download now: https://plantify.app');
                   break;
                 case 'Contact':
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const ContactScreen()));
@@ -167,19 +168,28 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: SizedBox(
                 height: 100,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    _buildCropItem(context, 'Almond'),
-                    _buildCropItem(context, 'Apricot'),
-                    _buildCropItem(context, 'Barley'),
-                    _buildCropItem(context, 'Banana'),
-                    _buildAddCropItem(context),
-                  ],
+                child: Consumer<PreferenceService>(
+                  builder: (context, prefs, child) {
+                    final crops = prefs.selectedCrops;
+                    return ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: crops.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index < crops.length) {
+                          return _buildCropItem(context, crops[index]);
+                        } else {
+                          return _buildAddCropItem(context);
+                        }
+                      },
+                    );
+                  },
                 ),
               ),
             ),
+            
+            // Survey Card
+            const SurveyCard(),
 
             // 2. Main Section (Weather + Scan) with Gradient
             Container(
@@ -404,53 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 32),
 
-            // 5. Library Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                AppLocalizations.of(context)!.library,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _buildNewLibraryCardLarge(
-                      context, 
-                      AppLocalizations.of(context)!.cultivationTips, 
-                      Icons.spa_outlined,
-                      const Color(0xFFE3E8FF)
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _buildNewLibraryCardSmall(
-                          context, 
-                          AppLocalizations.of(context)!.pestsAndDiseases, 
-                          Icons.bug_report_outlined,
-                          const Color(0xFFE3E8FF)
-                        ),
-                        const SizedBox(height: 12),
-                        _buildNewLibraryCardSmall(
-                          context, 
-                          AppLocalizations.of(context)!.pestsAndDiseaseAlert, 
-                          Icons.warning_amber_rounded,
-                          const Color(0xFFE3E8FF),
-                          hasAlert: true
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
-            const SizedBox(height: 32),
 
             // 6. Sponsored / Banner
             Padding(
